@@ -1,8 +1,8 @@
-import { useCallback } from 'react';
+import React, { useCallback } from 'react';
 
 import { useArrowKeyPress } from '../hooks/UseArrowKeyPress';
 import { moveMapIn2048Rule } from '../utils/logic';
-import type { Cell, Direction, Map2048 } from './Types';
+import type { Cell, Direction, GameState, Map2048 } from './Types';
 
 function Tile({ value }: TileProps) {
   const tileClass =
@@ -10,23 +10,40 @@ function Tile({ value }: TileProps) {
   return <div className={tileClass}>{value}</div>;
 }
 
-function Board({ map2048, setMap2048 }: BoardProps) {
+function Board({ map2048, setMap2048, gameState, setGameState }: BoardProps) {
   const move = useCallback(
     (direction: Direction) => {
       const { result, isMoved } = moveMapIn2048Rule(map2048, direction);
-      if (isMoved) {
-        setMap2048(spawn(result));
-      } else {
-        setMap2048(result);
+      const resultAfterSpawn = isMoved ? spawn(result) : result;
+      if (
+        resultAfterSpawn.some((row) =>
+          row.some((cell) => cell !== null && cell >= 128),
+        )
+      ) {
+        setGameState({ isEnd: true, message: 'You Win!' });
+      } else if (
+        resultAfterSpawn.every((row) =>
+          row.every((cell) => cell !== 0 && cell !== null),
+        )
+      ) {
+        const allDirections: Direction[] = ['up', 'down', 'left', 'right'];
+        if (
+          allDirections.every(
+            (d) => !moveMapIn2048Rule(resultAfterSpawn, d).isMoved,
+          )
+        ) {
+          setGameState({ isEnd: true, message: 'Game Over!' });
+        }
       }
+      setMap2048(resultAfterSpawn);
     },
-    [map2048, setMap2048],
+    [map2048, setMap2048, setGameState],
   );
 
   useArrowKeyPress(move);
 
   return (
-    <div className="board">
+    <div className={`board ${gameState.isEnd ? 'faded' : ''}`}>
       {map2048.map((row, rowIdx) =>
         row.map((value, colIdx) => (
           <Tile key={`${rowIdx}-${colIdx}`} value={value} />
@@ -71,6 +88,8 @@ interface TileProps {
 interface BoardProps {
   map2048: Map2048;
   setMap2048: React.Dispatch<React.SetStateAction<Map2048>>;
+  gameState: GameState;
+  setGameState: React.Dispatch<React.SetStateAction<GameState>>;
 }
 
 export default Board;
