@@ -5,4 +5,5 @@ export interface GameState {
   isEnd: boolean;
   message: string;
   map2048: Map2048;
+  lastGameState: GameState | null;
 }
