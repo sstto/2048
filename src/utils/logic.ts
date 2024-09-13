@@ -96,7 +96,7 @@ const moveRowLeft = (row: Cell[]): { result: Cell[]; isMoved: boolean } => {
 
   return {
     result: resultRow,
-    isMoved: row.some((cell, i) => cell !== result[i]),
+    isMoved: row.some((cell, i) => cell != result[i]), // 0과 null은 같음으로 취급해야하므로 !==대신 != 연산자 사용
   };
 };
 
