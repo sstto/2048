@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 import { useArrowKeyPress } from '../hooks/UseArrowKeyPress';
 import { moveMapIn2048Rule } from '../utils/logic';
@@ -11,14 +11,20 @@ function Tile({ value }: TileProps) {
 }
 
 function Board({ map2048, setMap2048 }: BoardProps) {
+  const [isEnd, SetIsEnd] = useState<boolean>();
+
   const move = useCallback(
     (direction: Direction) => {
       const { result, isMoved } = moveMapIn2048Rule(map2048, direction);
-      if (isMoved) {
-        setMap2048(spawn(result));
-      } else {
-        setMap2048(result);
+      const resultAfterSpawn = isMoved ? spawn(result) : result;
+      if (
+        resultAfterSpawn.every((row) =>
+          row.every((cell) => cell !== 0 && cell !== null),
+        )
+      ) {
+        console.log('full');
       }
+      setMap2048(resultAfterSpawn);
     },
     [map2048, setMap2048],
   );
