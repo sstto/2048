@@ -19,18 +19,22 @@ function Tile({ value }: TileProps) {
 function Board({ gameState, setGameState }: BoardProps) {
   const move = useCallback(
     (direction: Direction) => {
+      if (gameState.isEnd) return;
       const { result, isMoved } = moveMapIn2048Rule(
         gameState.map2048,
         direction,
       );
       const resultAfterSpawn = isMoved ? spawnRandomly(result) : result;
       if (containsNumberAbove(128, resultAfterSpawn)) {
+        // 128 완성했을 때
         setGameState({
           isEnd: true,
           message: 'You Win!',
           map2048: resultAfterSpawn,
+          lastGameState: { ...gameState },
         });
       } else if (
+        // 모든 Cell이 가득 차있고 움직일 수 없을 때
         isAllTruthyElements(resultAfterSpawn) &&
         !canMove(resultAfterSpawn)
       ) {
@@ -38,9 +42,14 @@ function Board({ gameState, setGameState }: BoardProps) {
           isEnd: true,
           message: 'Game Over!',
           map2048: resultAfterSpawn,
+          lastGameState: { ...gameState },
         });
       } else {
-        setGameState({ ...gameState, map2048: resultAfterSpawn });
+        setGameState({
+          ...gameState,
+          map2048: resultAfterSpawn,
+          lastGameState: { ...gameState },
+        });
       }
     },
     [gameState, setGameState],
