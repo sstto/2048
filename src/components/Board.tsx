@@ -1,8 +1,14 @@
 import React, { useCallback } from 'react';
 
 import { useArrowKeyPress } from '../hooks/UseArrowKeyPress';
-import { moveMapIn2048Rule } from '../utils/logic';
-import type { Cell, Direction, GameState, Map2048 } from './Types';
+import {
+  canMove,
+  containsNumberAbove,
+  isAllTruthyElements,
+  spawnRandomly,
+} from '../utils/common';
+import { moveMapIn2048Rule } from '../utils/core_logics';
+import type { Cell, Direction, GameState } from './Types';
 
 function Tile({ value }: TileProps) {
   const tileClass =
@@ -10,41 +16,41 @@ function Tile({ value }: TileProps) {
   return <div className={tileClass}>{value}</div>;
 }
 
-function Board({ map2048, setMap2048, gameState, setGameState }: BoardProps) {
+function Board({ gameState, setGameState }: BoardProps) {
   const move = useCallback(
     (direction: Direction) => {
-      const { result, isMoved } = moveMapIn2048Rule(map2048, direction);
-      const resultAfterSpawn = isMoved ? spawn(result) : result;
-      if (
-        resultAfterSpawn.some((row) =>
-          row.some((cell) => cell !== null && cell >= 128),
-        )
-      ) {
-        setGameState({ isEnd: true, message: 'You Win!' });
+      const { result, isMoved } = moveMapIn2048Rule(
+        gameState.map2048,
+        direction,
+      );
+      const resultAfterSpawn = isMoved ? spawnRandomly(result) : result;
+      if (containsNumberAbove(128, resultAfterSpawn)) {
+        setGameState({
+          isEnd: true,
+          message: 'You Win!',
+          map2048: resultAfterSpawn,
+        });
       } else if (
-        resultAfterSpawn.every((row) =>
-          row.every((cell) => cell !== 0 && cell !== null),
-        )
+        isAllTruthyElements(resultAfterSpawn) &&
+        !canMove(resultAfterSpawn)
       ) {
-        const allDirections: Direction[] = ['up', 'down', 'left', 'right'];
-        if (
-          allDirections.every(
-            (d) => !moveMapIn2048Rule(resultAfterSpawn, d).isMoved,
-          )
-        ) {
-          setGameState({ isEnd: true, message: 'Game Over!' });
-        }
+        setGameState({
+          isEnd: true,
+          message: 'Game Over!',
+          map2048: resultAfterSpawn,
+        });
+      } else {
+        setGameState({ ...gameState, map2048: resultAfterSpawn });
       }
-      setMap2048(resultAfterSpawn);
     },
-    [map2048, setMap2048, setGameState],
+    [gameState, setGameState],
   );
 
   useArrowKeyPress(move);
 
   return (
     <div className={`board ${gameState.isEnd ? 'faded' : ''}`}>
-      {map2048.map((row, rowIdx) =>
+      {gameState.map2048.map((row, rowIdx) =>
         row.map((value, colIdx) => (
           <Tile key={`${rowIdx}-${colIdx}`} value={value} />
         )),
@@ -53,41 +59,11 @@ function Board({ map2048, setMap2048, gameState, setGameState }: BoardProps) {
   );
 }
 
-const spawn = (map: Map2048) => {
-  const emptyCells: CellPosition[] = [];
-  map.forEach((row, rowIdx) => {
-    row.forEach((value, colIdx) => {
-      if (value === null || value === 0) {
-        emptyCells.push({ rowIdx: rowIdx, colIdx: colIdx });
-      }
-    });
-  });
-  if (emptyCells.length === 0) {
-    return map;
-  }
-  const randomIdx = Math.floor(Math.random() * emptyCells.length);
-  const { rowIdx: randomRowIdx, colIdx: randomColIdx } = emptyCells[
-    randomIdx
-  ] as CellPosition;
-  return map.map((row, rowIndex) =>
-    row.map((cell, colIndex) =>
-      rowIndex === randomRowIdx && colIndex === randomColIdx ? 2 : cell,
-    ),
-  );
-};
-
-interface CellPosition {
-  rowIdx: number;
-  colIdx: number;
-}
-
 interface TileProps {
   value: Cell;
 }
 
 interface BoardProps {
-  map2048: Map2048;
-  setMap2048: React.Dispatch<React.SetStateAction<Map2048>>;
   gameState: GameState;
   setGameState: React.Dispatch<React.SetStateAction<GameState>>;
 }

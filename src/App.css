@@ -38,6 +38,28 @@
   text-align: center;
 }
 
+.game-button {
+  background-color: #8f7a66;
+  color: #f9f6f2;
+  border: none;
+  padding: 15px 30px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+/* 버튼 호버 효과 */
+.game-button:hover {
+  background-color: #9f8b77;
+}
+
+/* 버튼 클릭 시 효과 */
+.game-button:active {
+  background-color: #776e65;
+}
+
 .tile {
   display: flex;
   justify-content: center;
