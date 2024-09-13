@@ -4,4 +4,5 @@ export type Direction = 'up' | 'left' | 'right' | 'down';
 export interface GameState {
   isEnd: boolean;
   message: string;
+  map2048: Map2048;
 }
