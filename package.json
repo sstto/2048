@@ -12,7 +12,8 @@
     "lint:check": "eslint .",
     "lint:fix": "eslint --fix .",
     "unused:check": "knip",
-    "check-all": "yarn types:check && yarn format:check && yarn lint:check && yarn unused:check"
+    "check-all": "yarn types:check && yarn format:check && yarn lint:check && yarn unused:check",
+    "test": "vitest"
   },
   "dependencies": {
     "react": "18.3.1",
@@ -27,7 +28,8 @@
     "knip": "5.29.1",
     "prettier": "3.3.3",
     "typescript": "5.5.4",
-    "vite": "5.4.3"
+    "vite": "5.4.3",
+    "vitest": "^2.1.6"
   },
   "packageManager": "yarn@4.4.1"
 }
