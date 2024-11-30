@@ -4,7 +4,7 @@ import { useArrowKeyPress } from '../hooks/UseArrowKeyPress';
 import {
   canMove,
   containsNumberAbove,
-  isAllTruthyElements,
+  isMapFull,
   spawnRandomly,
 } from '../utils/common';
 import { moveMapIn2048Rule } from '../utils/core_logics';
@@ -64,7 +64,7 @@ const calculateNextGameState = (
 
   if (
     // 패배 조건
-    isAllTruthyElements(resultAfterSpawn) &&
+    isMapFull(resultAfterSpawn) &&
     !canMove(resultAfterSpawn)
   ) {
     return {
