@@ -19,37 +19,12 @@ function Tile({ value }: TileProps) {
 function Board({ gameState, setGameState }: BoardProps) {
   const move = useCallback(
     (direction: Direction) => {
-      if (gameState.isEnd) return;
-      const { result, isMoved } = moveMapIn2048Rule(
-        gameState.map2048,
-        direction,
-      );
-      const resultAfterSpawn = isMoved ? spawnRandomly(result) : result;
-      if (containsNumberAbove(128, resultAfterSpawn)) {
-        // 128 완성했을 때
-        setGameState({
-          isEnd: true,
-          message: 'You Win!',
-          map2048: resultAfterSpawn,
-          lastGameState: { ...gameState },
-        });
-      } else if (
-        // 모든 Cell이 가득 차있고 움직일 수 없을 때
-        isAllTruthyElements(resultAfterSpawn) &&
-        !canMove(resultAfterSpawn)
-      ) {
-        setGameState({
-          isEnd: true,
-          message: 'Game Over!',
-          map2048: resultAfterSpawn,
-          lastGameState: { ...gameState },
-        });
-      } else {
-        setGameState({
-          ...gameState,
-          map2048: resultAfterSpawn,
-          lastGameState: { ...gameState },
-        });
+      const nextGameState = calculateNextGameState(direction, gameState);
+      if (nextGameState != null) {
+        setGameState((prevState) => ({
+          ...prevState,
+          ...nextGameState,
+        }));
       }
     },
     [gameState, setGameState],
@@ -67,6 +42,45 @@ function Board({ gameState, setGameState }: BoardProps) {
     </div>
   );
 }
+
+const calculateNextGameState = (
+  direction: Direction,
+  gameState: GameState,
+): Partial<GameState> | null => {
+  if (gameState.isEnd) return null;
+
+  const { result, isMoved } = moveMapIn2048Rule(gameState.map2048, direction);
+  const resultAfterSpawn = isMoved ? spawnRandomly(result) : result;
+
+  if (containsNumberAbove(128, resultAfterSpawn)) {
+    // 승리 조건
+    return {
+      isEnd: true,
+      message: 'You Win!',
+      map2048: resultAfterSpawn,
+      lastGameState: { ...gameState },
+    };
+  }
+
+  if (
+    // 패배 조건
+    isAllTruthyElements(resultAfterSpawn) &&
+    !canMove(resultAfterSpawn)
+  ) {
+    return {
+      isEnd: true,
+      message: 'Game Over!',
+      map2048: resultAfterSpawn,
+      lastGameState: { ...gameState },
+    };
+  }
+
+  // 게임 진행 중
+  return {
+    map2048: resultAfterSpawn,
+    lastGameState: { ...gameState },
+  };
+};
 
 interface TileProps {
   value: Cell;
