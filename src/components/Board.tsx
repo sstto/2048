@@ -43,14 +43,21 @@ function Board({ gameState, setGameState }: BoardProps) {
   );
 }
 
-const calculateNextGameState = (
+/**
+ * 현재 게임 상태와 이동 방향, 타일 생성 여부를 바탕으로 다음 게임 상태를 계산합니다.
+ *
+ * @param shouldSpawnTile 이동 후 새로운 타일을 생성할지 여부.
+ */
+export const calculateNextGameState = (
   direction: Direction,
   gameState: GameState,
+  shouldSpawnTile: boolean = true,
 ): Partial<GameState> | null => {
   if (gameState.isEnd) return null;
 
   const { result, isMoved } = moveMapIn2048Rule(gameState.map2048, direction);
-  const resultAfterSpawn = isMoved ? spawnRandomly(result) : result;
+  const resultAfterSpawn =
+    isMoved && shouldSpawnTile ? spawnRandomly(result) : result;
 
   if (containsNumberAbove(128, resultAfterSpawn)) {
     // 승리 조건
