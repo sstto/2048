@@ -14,7 +14,7 @@ export const containsNumberAbove = (n: number, map: Map2048): boolean => {
  * @param map 2048 맵
  * @returns map이 가득 차있으면 true 리턴.
  */
-export const isAllTruthyElements = (map: Map2048): boolean => {
+export const isMapFull = (map: Map2048): boolean => {
   return map.every((row) => row.every((cell) => Boolean(cell)));
 };
 
